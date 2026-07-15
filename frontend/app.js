@@ -70,7 +70,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function connectWallet() {
   if (!window.ethereum) {
-    showToast("MetaMask not detected. Please install it.", "error");
+    showToast("No wallet detected. Install EVM wallet", "error");
     return;
   }
 
