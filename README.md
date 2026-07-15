@@ -1,4 +1,4 @@
-# Token Callback — Timelocked Escrow Safety Protocol
+# CallBack — Timelocked Escrow Safety Protocol
 
 > Send tokens with a safety window — cancel and get 100% refunds before the recipient is allowed to claim.
 
@@ -13,7 +13,7 @@ Built for the **Spark Hackathon** (July 13–19, 2026) and deployed on **Monad**
 
 **The Thesis:** Blockchain transactions are famously final. While immutability is a core strength of decentralized ledger systems, it is also the single greatest friction point for mainstream user adoption. Every day, Web3 users lose millions of dollars due to clipboard-hijacking malware, phishing links, and simple fat-finger typos. The fear of permanent loss forces users to send low-value "test transactions," wasting time and gas fees.
 
-**The Vision:** Token Callback humanizes Web3 UX by inserting a non-custodial, decentralized safety buffer between senders and recipients. By defaulting to a transaction with a customizable "safety window," senders gain the peace of mind that they can cancel and recall their tokens at any point if they realize an error was made. Once the window expires, ownership shifts irrevocably, giving the recipient standard finality. This bridges the gap between traditional banking consumer protections and Web3's absolute self-sovereign finality.
+**The Vision:** CallBack humanizes Web3 UX by inserting a non-custodial, decentralized safety buffer between senders and recipients. By defaulting to a transaction with a customizable "safety window," senders gain the peace of mind that they can cancel and recall their tokens at any point if they realize an error was made. Once the window expires, ownership shifts irrevocably, giving the recipient standard finality. This bridges the gap between traditional banking consumer protections and Web3's absolute self-sovereign finality.
 
 ---
 
@@ -24,7 +24,7 @@ Built for the **Spark Hackathon** (July 13–19, 2026) and deployed on **Monad**
 2. **Clipboard Hijacking Malware:** Malicious software monitors user clipboards and swaps copied recipient addresses with the attacker's address. Users who do not carefully inspect every single digit of the hexadecimal string are phished.
 3. **The Race-Condition Risk:** If a sender realizes they sent tokens to a wrong address, they are in a race against the recipient. If the recipient is a monitoring bot or a hostile actor, they will immediately claim/move the funds, making recovery impossible even if the sender acts within seconds.
 
-### The Solution: Token Callback
+### The Solution: CallBack
 1. **Decentralized Escrow Buffer:** Senders lock native MON or ERC-20 tokens in a secure, audited, gas-optimized smart contract rather than pushing them directly to the recipient.
 2. **Guaranteed Revocation Period:** The sender has absolute, cryptographic authority to cancel the transaction and withdraw 100% of the locked funds back to their wallet at any time during the safety window.
 3. **Timelocked Claims:** To eliminate race conditions, the recipient's claim capability is locked until the safety window expires. The recipient cannot front-run or race to claim the funds.

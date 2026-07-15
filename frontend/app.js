@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Token Callback — app.js
+   CallBack — app.js
    Wallet connection + contract interaction via ethers.js v6
    ========================================================================== */
 
