@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+/package-lock.json
+
+# Local Environment
+.env
+.env.local
+
+# Hardhat Build Artifacts
+/artifacts/
+/cache/
+/typechain/
+/typechain-types/
+/coverage/
+/coverage.json
+
+# IDEs & System files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db

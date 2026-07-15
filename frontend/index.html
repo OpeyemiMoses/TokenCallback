@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Token Callback — Send Tokens You Can Take Back</title>
+  <meta name="description" content="Send tokens with a safety window. Cancel any transfer before the recipient claims it. Built on Monad." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="landing.css" />
+</head>
+<body>
+
+  <!-- ── Nav ───────────────────────────────────────────────────────────── -->
+  <header class="top">
+    <nav class="top-nav">
+      <a href="index.html" class="top-logo">
+        <div class="top-logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>
+          </svg>
+        </div>
+        TokenCallback
+      </a>
+      <div class="top-links">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener">Contract ↗</a>
+        <a href="dashboard.html" class="pill-btn pill-primary mobile-launch-btn">Launch App</a>
+      </div>
+      <div class="top-actions">
+        <a href="dashboard.html" class="pill-btn pill-primary desktop-launch-btn">Launch App</a>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg-dots"></div>
+    <div class="hero-glow-top"></div>
+
+    <div class="hero-inner">
+      <div class="hero-overline rise">
+        <span class="overline-dot"></span>
+        BUILT ON MONAD &nbsp;·&nbsp; SPARK HACKATHON 2026
+      </div>
+
+      <h1 class="headline rise rise-d1">
+        Send tokens.<br/>Change your mind.
+      </h1>
+
+      <p class="hero-sub rise rise-d2">
+        Every transfer holds in a safety window.<br/>
+        Cancel before the recipient claims — full refund, no questions asked.
+      </p>
+
+      <div class="hero-ctas rise rise-d3">
+        <a href="dashboard.html" class="pill-btn pill-primary pill-lg pill-sheen">
+          Launch App
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener" class="pill-btn pill-ghost pill-lg">
+          View Contract
+        </a>
+      </div>
+
+      <div class="hero-chips rise rise-d4">
+        <span class="hero-chip">Native MON</span>
+        <span class="hero-chip">ERC-20 tokens</span>
+        <span class="hero-chip">15 min – 24 hr windows</span>
+      </div>
+
+      <!-- Floating browser mockup -->
+      <div class="mockup-wrap rise rise-d5">
+
+        <!-- Left floating card -->
+        <div class="side-card side-left float-left">
+          <div class="side-card-label">Outbox</div>
+          <div class="side-card-value">3 pending</div>
+          <div class="side-card-sub">↗ 0.25 MON · 14m left</div>
+        </div>
+
+        <!-- Main browser window -->
+        <div class="browser-window">
+          <div class="browser-chrome">
+            <div class="traffic-lights">
+              <span class="tl tl-red"></span>
+              <span class="tl tl-amber"></span>
+              <span class="tl tl-green"></span>
+            </div>
+            <div class="browser-url">tokencallback://transfers</div>
+          </div>
+          <div class="browser-body">
+
+            <div class="mock-header">
+              <span class="mock-title">Your Transfers</span>
+              <a href="dashboard.html" class="mock-new-btn">+ New</a>
+            </div>
+
+            <!-- Transfer row 1 — pending, animated -->
+            <div class="mock-row" id="mock-row-1">
+              <div class="mock-row-left">
+                <div class="mock-row-amount">2.5000 <span>MON</span></div>
+                <div class="mock-row-to mono">→ 0x9f3a…4B2c</div>
+              </div>
+              <div class="mock-row-right">
+                <span class="mock-status pending" id="mock-status-1"><span class="pulse-dot"></span>Pending</span>
+                <button class="mock-cancel" id="mock-cancel-1">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Transfer row 2 — claimed -->
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <div class="mock-row-amount">100.0 <span>USDC</span></div>
+                <div class="mock-row-to mono">→ 0xAb2f…9E1d</div>
+              </div>
+              <div class="mock-row-right">
+                <span class="mock-status claimed"><span class="pulse-dot"></span>Claimed</span>
+              </div>
+            </div>
+
+            <!-- Transfer row 3 — pending -->
+            <div class="mock-row">
+              <div class="mock-row-left">
+                <div class="mock-row-amount">0.8200 <span>MON</span></div>
+                <div class="mock-row-to mono">→ 0x7c4E…2Fa0</div>
+              </div>
+              <div class="mock-row-right">
+                <span class="mock-status pending"><span class="pulse-dot"></span>Pending</span>
+                <button class="mock-cancel">Cancel</button>
+              </div>
+            </div>
+
+            <div class="mock-footer">
+              <span class="mock-stat" id="mock-stat-total">— total transfers</span>
+              <span class="mock-net"><span class="mock-net-dot"></span>Monad Testnet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right floating card -->
+        <div class="side-card side-right float-right">
+          <div class="side-card-label">Safety Window</div>
+          <div class="side-card-value mono" id="side-countdown">23m 14s</div>
+          <div class="side-card-sub">remaining · can cancel</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Light: How It Works ────────────────────────────────────────── -->
+  <section class="band band-paper" id="how">
+    <div class="band-inner">
+      <div class="band-overline rise">HOW IT WORKS</div>
+      <h2 class="section-h rise">
+        Three steps to<br/>safer transfers.
+      </h2>
+      <p class="section-sub rise">
+        No more panic after hitting send. TokenCallback gives you a window to course-correct.
+      </p>
+
+      <div class="steps-row">
+        <div class="step-card rise">
+          <div class="step-num">01</div>
+          <div class="step-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </div>
+          <h3>Send with a window</h3>
+          <p>Tokens lock in the contract — not sent directly. Pick 15 min to 24 hrs.</p>
+        </div>
+        <div class="step-arrow rise">→</div>
+        <div class="step-card rise">
+          <div class="step-num">02</div>
+          <div class="step-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </div>
+          <h3>Cancel anytime</h3>
+          <p>Made a mistake? Cancel before the recipient claims — tokens return instantly.</p>
+        </div>
+        <div class="step-arrow rise">→</div>
+        <div class="step-card rise">
+          <div class="step-num">03</div>
+          <div class="step-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h3>Recipient claims</h3>
+          <p>Right address? The recipient claims from their inbox. Window closes, transfer finalises.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Dark: Features ────────────────────────────────────────────── -->
+  <section class="band band-dark" id="features">
+    <div class="band-inner">
+      <div class="band-overline band-overline-dim rise">WHY TOKEN CALLBACK</div>
+      <h2 class="section-h section-h-light rise">
+        Built for real people<br/>making real mistakes.
+      </h2>
+
+      <div class="dark-cards-grid">
+        <div class="dark-card rise">
+          <div class="dc-icon purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </div>
+          <h3>Full refund on cancel</h3>
+          <p>Cancel before the recipient claims and every token comes back. No fees, no slippage.</p>
+        </div>
+        <div class="dark-card rise">
+          <div class="dc-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <h3>Configurable windows</h3>
+          <p>15 min for small transfers. 24 hrs for large amounts. Or set any custom duration.</p>
+        </div>
+        <div class="dark-card rise">
+          <div class="dc-icon amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
+          </div>
+          <h3>MON + any ERC-20</h3>
+          <p>Works with the native gas token and any ERC-20 on Monad. One contract handles all.</p>
+        </div>
+        <div class="dark-card rise">
+          <div class="dc-icon blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Non-custodial</h3>
+          <p>The smart contract holds your tokens. No admin keys, no upgradeable proxy, fully on-chain.</p>
+        </div>
+        <div class="dark-card rise">
+          <div class="dc-icon red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Monad fast</h3>
+          <p>~0.5s block time. Your cancel lands before you second-guess it. Cheap gas too.</p>
+        </div>
+        <div class="dark-card rise">
+          <div class="dc-icon pink">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          </div>
+          <h3>Inbox for recipients</h3>
+          <p>Recipients see incoming transfers in their inbox. Claim on their own time, before it expires.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats ─────────────────────────────────────────────────────── -->
+  <section class="band band-paper">
+    <div class="band-inner stats-band">
+      <div class="stat-item rise">
+        <span class="stat-big" id="stat-total">—</span>
+        <span class="stat-label">Protocol transfers</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item rise">
+        <span class="stat-big">~0.5s</span>
+        <span class="stat-label">Monad block time</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item rise">
+        <span class="stat-big">100%</span>
+        <span class="stat-label">Non-custodial</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item rise">
+        <span class="stat-big">2</span>
+        <span class="stat-label">Tokens supported</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ───────────────────────────────────────────────────────── -->
+  <section class="band band-cta">
+    <div class="cta-glow"></div>
+    <div class="band-inner band-inner-center">
+      <div class="band-overline rise">GET STARTED</div>
+      <h2 class="headline headline-cta rise rise-d1">
+        Ready to send<br/>with confidence?
+      </h2>
+      <p class="hero-sub rise rise-d2">Connect your wallet and make your first<br/>cancellable transfer in under a minute.</p>
+      <a href="dashboard.html" class="pill-btn pill-primary pill-xl pill-sheen rise rise-d3">
+        Launch App
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">TokenCallback</span>
+        <span class="footer-built">Built for Spark Hackathon · Monad 2026</span>
+      </div>
+      <div class="footer-links">
+        <a href="dashboard.html">Launch App</a>
+        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener">Contract ↗</a>
+        <a href="https://docs.monad.xyz" target="_blank" rel="noopener">Monad Docs ↗</a>
+        <a href="https://faucet.monad.xyz" target="_blank" rel="noopener">Faucet ↗</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+  <script>
+    // ── Scroll reveal ─────────────────────────────────────────────────
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('risen'); io.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.rise').forEach(el => io.observe(el));
+
+    // ── Side countdown ────────────────────────────────────────────────
+    let sideS = 1394;
+    setInterval(() => {
+      sideS = sideS > 0 ? sideS - 1 : 1394;
+      const m = Math.floor(sideS / 60), s = sideS % 60;
+      document.getElementById('side-countdown').textContent = `${m}m ${s.toString().padStart(2,'0')}s`;
+    }, 1000);
+
+    // ── Demo cancel animation ─────────────────────────────────────────
+    function runDemoCancel() {
+      const btn    = document.getElementById('mock-cancel-1');
+      const status = document.getElementById('mock-status-1');
+      if (!btn) return;
+      btn.textContent = 'Cancelling…';
+      btn.style.opacity = '0.5';
+      setTimeout(() => {
+        status.className = 'mock-status cancelled';
+        status.innerHTML = '<span class="pulse-dot"></span>Cancelled';
+        btn.style.display = 'none';
+        setTimeout(() => {
+          status.className = 'mock-status pending';
+          status.innerHTML = '<span class="pulse-dot"></span>Pending';
+          btn.style.display = '';
+          btn.textContent = 'Cancel';
+          btn.style.opacity = '';
+        }, 2500);
+      }, 1000);
+    }
+    setTimeout(() => { runDemoCancel(); setInterval(runDemoCancel, 8000); }, 3500);
+
+    // ── Fetch total transfers via Ethers ──────────────────────────────
+    async function loadLandingStats() {
+      try {
+        const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz/');
+        const contract = new ethers.Contract('0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405', ['function totalTransfers() view returns (uint256)'], provider);
+        const total = await contract.totalTransfers();
+        document.getElementById('stat-total').textContent = total.toString();
+        const m = document.getElementById('mock-stat-total');
+        if (m) m.textContent = total.toString() + ' total transfers';
+      } catch (err) {
+        console.error("Failed to load landing page stats:", err);
+      }
+    }
+    loadLandingStats();
+
+    // ── Hamburger Menu Toggle ─────────────────────────────────────────
+    const menuToggle = document.getElementById('menu-toggle');
+    const topLinks = document.querySelector('.top-links');
+    
+    if (menuToggle && topLinks) {
+      menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuToggle.classList.toggle('active');
+        topLinks.classList.toggle('active');
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!topLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+          menuToggle.classList.remove('active');
+          topLinks.classList.remove('active');
+        }
+      });
+
+      // Close menu when clicking any link
+      topLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.classList.remove('active');
+          topLinks.classList.remove('active');
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "token-callback",
+  "version": "1.0.0",
+  "description": "Time-locked token escrow on Monad — cancel before they claim",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network monadTestnet",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^17.4.2"
+  }
+}
