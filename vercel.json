@@ -1,6 +1,13 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/:path*", "destination": "/frontend/:path*" }
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/dashboard.html", "destination": "/frontend/dashboard.html" },
+    { "source": "/landing.css", "destination": "/frontend/landing.css" },
+    { "source": "/dashboard.css", "destination": "/frontend/dashboard.css" },
+    { "source": "/style.css", "destination": "/frontend/style.css" },
+    { "source": "/app.js", "destination": "/frontend/app.js" },
+    { "source": "/logo.png", "destination": "/frontend/logo.png" },
+    { "source": "/favicon.ico", "destination": "/frontend/favicon.ico" }
   ]
 }
