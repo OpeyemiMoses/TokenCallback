@@ -20,7 +20,7 @@ module.exports = {
     },
     monadMainnet: {
       url: "https://rpc.monad.xyz/",
-      chainId: 41455,
+      chainId: 143,
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },

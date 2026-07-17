@@ -5,18 +5,18 @@
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const CONTRACT_ADDRESS = "0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405"; // Monad Testnet
+const CONTRACT_ADDRESS = "0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be"; // Monad Mainnet
 
-const MONAD_TESTNET = {
-  chainId:         "0x279F",  // 10143
-  chainIdDecimal:  10143,
-  chainName:       "Monad Testnet",
-  rpcUrls:         ["https://testnet-rpc.monad.xyz/"],
+const MONAD_MAINNET = {
+  chainId:         "0x8F",  // 143
+  chainIdDecimal:  143,
+  chainName:       "Monad Mainnet",
+  rpcUrls:         ["https://rpc.monad.xyz/"],
   nativeCurrency:  { name: "MON", symbol: "MON", decimals: 18 },
-  blockExplorerUrls: ["https://testnet.monadexplorer.com"],
+  blockExplorerUrls: ["https://monadscan.com"],
 };
 
-const EXPLORER_URL = MONAD_TESTNET.blockExplorerUrls[0];
+const EXPLORER_URL = MONAD_MAINNET.blockExplorerUrls[0];
 
 // Minimal ABI — only what we need
 const ABI = [
@@ -104,13 +104,13 @@ async function switchToMonad() {
   try {
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: MONAD_TESTNET.chainId }],
+      params: [{ chainId: MONAD_MAINNET.chainId }],
     });
   } catch (err) {
     if (err.code === 4902) {
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
-        params: [MONAD_TESTNET],
+        params: [MONAD_MAINNET],
       });
     } else {
       throw err;

@@ -25,7 +25,7 @@
       <div class="top-links">
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
-        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener">Contract ↗</a>
+        <a href="https://monadscan.com/address/0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be" target="_blank" rel="noopener">Contract ↗</a>
         <a href="dashboard.html" class="pill-btn pill-primary mobile-launch-btn">Launch App</a>
       </div>
       <div class="top-actions">
@@ -64,7 +64,7 @@
           Launch App
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener" class="pill-btn pill-ghost pill-lg">
+        <a href="https://monadscan.com/address/0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be" target="_blank" rel="noopener" class="pill-btn pill-ghost pill-lg">
           View Contract
         </a>
       </div>
@@ -139,7 +139,7 @@
 
             <div class="mock-footer">
               <span class="mock-stat" id="mock-stat-total">— total transfers</span>
-              <span class="mock-net"><span class="mock-net-dot"></span>Monad Testnet</span>
+              <span class="mock-net"><span class="mock-net-dot"></span>Monad Mainnet</span>
             </div>
           </div>
         </div>
@@ -302,7 +302,7 @@
       </div>
       <div class="footer-links">
         <a href="dashboard.html">Launch App</a>
-        <a href="https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405" target="_blank" rel="noopener">Contract ↗</a>
+        <a href="https://monadscan.com/address/0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be" target="_blank" rel="noopener">Contract ↗</a>
         <a href="https://docs.monad.xyz" target="_blank" rel="noopener">Monad Docs ↗</a>
         <a href="https://faucet.monad.xyz" target="_blank" rel="noopener">Faucet ↗</a>
       </div>
@@ -350,8 +350,8 @@
     // ── Fetch total transfers via Ethers ──────────────────────────────
     async function loadLandingStats() {
       try {
-        const provider = new ethers.JsonRpcProvider('https://testnet-rpc.monad.xyz/');
-        const contract = new ethers.Contract('0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405', ['function totalTransfers() view returns (uint256)'], provider);
+        const provider = new ethers.JsonRpcProvider('https://rpc.monad.xyz/');
+        const contract = new ethers.Contract('0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be', ['function totalTransfers() view returns (uint256)'], provider);
         const total = await contract.totalTransfers();
         document.getElementById('stat-total').textContent = total.toString();
         const m = document.getElementById('mock-stat-total');

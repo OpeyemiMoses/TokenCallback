@@ -4,8 +4,8 @@
 
 Built for the **Spark Hackathon** (July 13–19, 2026) and deployed on **Monad**.
 
-* **Deployed Contract Address:** [`0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405`](https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405)
-* **Monad Testnet Explorer:** [View Contract on Explorer](https://testnet.monadexplorer.com/address/0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405)
+* **Deployed Contract Address:** [`0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be`](https://monadscan.com/address/0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be)
+* **Monad Mainnet Explorer:** [View Contract on Explorer](https://monadscan.com/address/0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be)
 
 ---
 
@@ -137,8 +137,8 @@ Simply serve the files using a local server or open `frontend/index.html` direct
 
 * **Hackathon:** Built for the [Spark Hackathon](https://buildanything.so/hackathons/spark) (July 13–19, 2026).
 * **Category:** DeFi & Consumer Usability / UX Innovations.
-* **Target Network:** Monad Testnet.
-* **EVM Contract Address:** `0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405`
+* **Target Network:** Monad Mainnet.
+* **EVM Contract Address:** `0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be`
 
 ---
 
