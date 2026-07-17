@@ -49,14 +49,42 @@ let selectedTokenType  = "native";  // "native" | "erc20"
 let selectedDeadlineSec = 3600;     // default 1 hour
 let nativeBalance       = 0n;
 
+// EIP-6963 Wallet Discovery State
+const discoveredProviders = new Map();
+let selectedProviderDetail = null;
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 window.addEventListener("DOMContentLoaded", async () => {
   updateSummary();
 
-  // Auto-reconnect if localStorage says we connected previously
-  if (localStorage.getItem("walletConnected") === "true" && window.ethereum) {
-    try { await connectWallet(); } catch (_) {}
+  // Listen for announced wallets (EIP-6963)
+  window.addEventListener("eip6963:announceProvider", (event) => {
+    const { info, provider: providerObj } = event.detail;
+    discoveredProviders.set(info.uuid, { info, provider: providerObj });
+    renderWalletList();
+
+    // Auto-reconnect if it matches the saved uuid
+    if (localStorage.getItem("walletConnected") === "true" && 
+        localStorage.getItem("walletType") === "eip6963" &&
+        localStorage.getItem("walletUuid") === info.uuid) {
+      selectedProviderDetail = { info, provider: providerObj };
+      connectSelectedWallet(false).catch(() => {});
+    }
+  });
+
+  // Request provider announcements
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+  // Check if we need to auto-reconnect standard injected wallet
+  if (localStorage.getItem("walletConnected") === "true") {
+    const wType = localStorage.getItem("walletType");
+    if (!wType || wType === "injected") {
+      selectedProviderDetail = null;
+      if (window.ethereum) {
+        connectSelectedWallet(false).catch(() => {});
+      }
+    }
   }
 
   // Watch form inputs for live summary
@@ -67,27 +95,36 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 
-async function connectWallet(forceFresh = false) {
-  if (!window.ethereum) {
+function connectWallet() {
+  // Instead of auto-prompting window.ethereum, open wallet chooser
+  openWalletModal();
+}
+
+async function connectSelectedWallet(forceFresh = false) {
+  const activeProviderObj = selectedProviderDetail ? selectedProviderDetail.provider : window.ethereum;
+  
+  if (!activeProviderObj) {
     showToast("No wallet detected. Install EVM wallet", "error");
     return;
   }
 
   try {
-    provider = new ethers.BrowserProvider(window.ethereum);
+    provider = new ethers.BrowserProvider(activeProviderObj);
 
     if (forceFresh) {
       // Force account selection for a fresh session
-      await window.ethereum.request({
+      await activeProviderObj.request({
         method: "wallet_requestPermissions",
         params: [{ eth_accounts: {} }],
       });
     }
 
-    await provider.send("eth_requestAccounts", []);
+    await activeProviderObj.request({
+      method: "eth_requestAccounts",
+    });
 
     // Switch to Monad Mainnet
-    await switchToMonad();
+    await switchToMonadWithProvider(activeProviderObj);
 
     signer      = await provider.getSigner();
     userAddress = await signer.getAddress();
@@ -96,11 +133,19 @@ async function connectWallet(forceFresh = false) {
     onConnected();
 
     // Listen for account / chain changes
-    window.ethereum.on("accountsChanged", accounts => {
+    activeProviderObj.on("accountsChanged", accounts => {
       if (accounts.length === 0) onDisconnected();
       else location.reload();
     });
-    window.ethereum.on("chainChanged", () => location.reload());
+    activeProviderObj.on("chainChanged", () => location.reload());
+
+    // Save connection details
+    if (selectedProviderDetail) {
+      localStorage.setItem("walletType", "eip6963");
+      localStorage.setItem("walletUuid", selectedProviderDetail.info.uuid);
+    } else {
+      localStorage.setItem("walletType", "injected");
+    }
 
   } catch (err) {
     console.error(err);
@@ -108,15 +153,15 @@ async function connectWallet(forceFresh = false) {
   }
 }
 
-async function switchToMonad() {
+async function switchToMonadWithProvider(activeProviderObj) {
   try {
-    await window.ethereum.request({
+    await activeProviderObj.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: MONAD_MAINNET.chainId }],
     });
   } catch (err) {
     if (err.code === 4902) {
-      await window.ethereum.request({
+      await activeProviderObj.request({
         method: "wallet_addEthereumChain",
         params: [MONAD_MAINNET],
       });
@@ -891,4 +936,90 @@ function shortAddress(addr) {
 function shortError(err) {
   const msg = err?.reason || err?.message || "Unknown error";
   return msg.length > 80 ? msg.slice(0, 80) + "…" : msg;
+}
+
+// ─── Wallet Selector Modal ────────────────────────────────────────────────────
+
+function openWalletModal() {
+  const modal = document.getElementById("wallet-modal");
+  if (!modal) return;
+  
+  // Request provider announcements again in case any new ones loaded
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+  
+  renderWalletList();
+  modal.classList.remove("hidden");
+}
+
+function closeWalletModalDirect() {
+  const modal = document.getElementById("wallet-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function closeWalletModal(event) {
+  if (event.target.id === "wallet-modal") {
+    closeWalletModalDirect();
+  }
+}
+
+function renderWalletList() {
+  const container = document.getElementById("wallet-list");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  
+  if (discoveredProviders.size === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 12px; color: var(--ivory-muted); font-size: 13px; border: 1px dashed var(--navy-border2); border-radius: 12px; width: 100%;">
+        No browser wallet extensions detected.
+      </div>
+    `;
+  } else {
+    discoveredProviders.forEach((wallet, uuid) => {
+      const btn = document.createElement("button");
+      btn.className = "wallet-option-btn";
+      btn.onclick = () => selectWalletProvider(uuid);
+      
+      btn.innerHTML = `
+        <div class="wallet-option-icon">
+          <img src="${wallet.info.icon}" alt="${wallet.info.name}" style="width: 24px; height: 24px;" />
+        </div>
+        <div class="wallet-option-info">
+          <span class="wallet-option-name">${wallet.info.name}</span>
+          <span class="wallet-option-desc">Connect using ${wallet.info.name} browser extension</span>
+        </div>
+      `;
+      container.appendChild(btn);
+    });
+  }
+  
+  // Always make standard fallback visible if window.ethereum exists
+  if (window.ethereum) {
+    document.getElementById("wallet-fallback")?.classList.remove("hidden");
+  } else {
+    document.getElementById("wallet-fallback")?.classList.add("hidden");
+  }
+}
+
+async function selectWalletProvider(uuid) {
+  closeWalletModalDirect();
+  const wallet = discoveredProviders.get(uuid);
+  if (!wallet) return;
+  
+  selectedProviderDetail = wallet;
+  try {
+    await connectSelectedWallet(true);
+  } catch (err) {
+    console.error("Wallet connection failed:", err);
+  }
+}
+
+async function selectFallbackProvider() {
+  closeWalletModalDirect();
+  selectedProviderDetail = null;
+  try {
+    await connectSelectedWallet(true);
+  } catch (err) {
+    console.error("Wallet connection failed:", err);
+  }
 }

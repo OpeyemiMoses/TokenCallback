@@ -255,6 +255,32 @@
     </div>
   </div>
 
+  <!-- ─── Wallet Selector Modal ─────────────────────────────────── -->
+  <div id="wallet-modal" class="modal-overlay hidden" onclick="closeWalletModal(event)">
+    <div class="modal wallet-selector-modal">
+      <div class="modal-header">
+        <h3>Connect Wallet</h3>
+        <button class="modal-close" onclick="closeWalletModalDirect()">&times;</button>
+      </div>
+      <p class="modal-subtitle">Select a wallet extension to connect:</p>
+      <div id="wallet-list" class="wallet-list">
+        <!-- Dynamically populated EIP-6963 provider list -->
+      </div>
+      <div class="modal-fallback hidden" id="wallet-fallback">
+        <hr class="modal-divider" />
+        <button id="injected-fallback-btn" class="wallet-option-btn" onclick="selectFallbackProvider()">
+          <div class="wallet-option-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <div class="wallet-option-info">
+            <span class="wallet-option-name">Default Browser Wallet</span>
+            <span class="wallet-option-desc">Connect using standard window.ethereum</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ─── Footer ────────────────────────────────────────────────── -->
   <footer class="footer">
     <div class="container">
