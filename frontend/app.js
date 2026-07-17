@@ -67,7 +67,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 // ─── Wallet ───────────────────────────────────────────────────────────────────
 
-async function connectWallet() {
+async function connectWallet(forceFresh = false) {
   if (!window.ethereum) {
     showToast("No wallet detected. Install EVM wallet", "error");
     return;
@@ -75,9 +75,18 @@ async function connectWallet() {
 
   try {
     provider = new ethers.BrowserProvider(window.ethereum);
+
+    if (forceFresh) {
+      // Force account selection for a fresh session
+      await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      });
+    }
+
     await provider.send("eth_requestAccounts", []);
 
-    // Switch to Monad Testnet
+    // Switch to Monad Mainnet
     await switchToMonad();
 
     signer      = await provider.getSigner();
@@ -148,7 +157,7 @@ function disconnectWallet() {
   localStorage.removeItem("walletConnected");
   closeMobileMenu();
 
-  // Clear local state — MetaMask manages its own connection
+  // Clear local state — the wallet extension manages its own connection
   provider    = null;
   signer      = null;
   contract    = null;

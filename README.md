@@ -120,7 +120,7 @@ npm run deploy:testnet
 ```
 
 ### 6. Run the Frontend locally
-Simply serve the files using a local server or open `frontend/index.html` directly in your browser. Make sure you have a Web3 browser wallet (e.g. MetaMask) set to the Monad Testnet.
+Simply serve the files using a local server or open `frontend/index.html` directly in your browser. Make sure you have a Web3 browser wallet (e.g. MetaMask, Rabby) set to Monad Mainnet.
 
 ---
 

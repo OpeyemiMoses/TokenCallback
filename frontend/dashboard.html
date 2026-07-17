@@ -28,7 +28,7 @@
           <span id="network-name">Monad Mainnet</span>
         </div>
         <!-- Not connected -->
-        <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">
+        <button id="connect-btn" class="btn btn-primary" onclick="connectWallet(true)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="20" height="14" x="2" y="5" rx="2"/>
             <path d="M2 10h20"/>
@@ -90,7 +90,7 @@
         </div>
         <h3>Connect your wallet to continue</h3>
         <p>You'll be switched to Monad Mainnet automatically.</p>
-        <button class="btn btn-primary btn-lg" onclick="connectWallet()">Connect Wallet</button>
+        <button class="btn btn-primary btn-lg" onclick="connectWallet(true)">Connect Wallet</button>
         <a href="index.html" class="btn btn-ghost" style="margin-top:-4px">← Back to home</a>
       </div>
     </div>
@@ -249,7 +249,7 @@
     <div class="modal">
       <div class="modal-icon" id="modal-icon"><div class="spinner spinner-lg"></div></div>
       <h3 id="modal-title">Confirm in Wallet</h3>
-      <p id="modal-body">Please approve the transaction in MetaMask.</p>
+      <p id="modal-body">Please approve the transaction in your wallet.</p>
       <a id="modal-explorer-link" href="#" target="_blank" class="btn btn-outline hidden" rel="noopener noreferrer">View on Explorer</a>
       <button class="btn btn-ghost" id="modal-close-btn" onclick="document.getElementById('tx-modal').classList.add('hidden')" style="display:none">Close</button>
     </div>
