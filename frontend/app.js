@@ -53,36 +53,65 @@ let nativeBalance       = 0n;
 const discoveredProviders = new Map();
 let selectedProviderDetail = null;
 
+// Listen for announced wallets (EIP-6963) immediately to catch early announcements
+window.addEventListener("eip6963:announceProvider", (event) => {
+  const { info, provider: providerObj } = event.detail;
+  discoveredProviders.set(info.uuid, { info, provider: providerObj });
+  
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    renderWalletList();
+  }
+
+  // Auto-reconnect if it matches the saved uuid
+  if (localStorage.getItem("walletConnected") === "true" && 
+      localStorage.getItem("walletType") === "eip6963" &&
+      localStorage.getItem("walletUuid") === info.uuid) {
+    selectedProviderDetail = { info, provider: providerObj };
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      connectSelectedWallet(false).catch(() => {});
+    }
+  }
+});
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 window.addEventListener("DOMContentLoaded", async () => {
   updateSummary();
 
-  // Listen for announced wallets (EIP-6963)
-  window.addEventListener("eip6963:announceProvider", (event) => {
-    const { info, provider: providerObj } = event.detail;
-    discoveredProviders.set(info.uuid, { info, provider: providerObj });
-    renderWalletList();
-
-    // Auto-reconnect if it matches the saved uuid
-    if (localStorage.getItem("walletConnected") === "true" && 
-        localStorage.getItem("walletType") === "eip6963" &&
-        localStorage.getItem("walletUuid") === info.uuid) {
-      selectedProviderDetail = { info, provider: providerObj };
-      connectSelectedWallet(false).catch(() => {});
-    }
-  });
-
   // Request provider announcements
   window.dispatchEvent(new Event("eip6963:requestProvider"));
 
-  // Check if we need to auto-reconnect standard injected wallet
+  // Check if we need to auto-reconnect standard injected wallet or EIP-6963 wallet
   if (localStorage.getItem("walletConnected") === "true") {
     const wType = localStorage.getItem("walletType");
-    if (!wType || wType === "injected") {
-      selectedProviderDetail = null;
-      if (window.ethereum) {
+    
+    if (wType === "eip6963") {
+      const savedUuid = localStorage.getItem("walletUuid");
+      if (savedUuid && discoveredProviders.has(savedUuid)) {
+        const wallet = discoveredProviders.get(savedUuid);
+        selectedProviderDetail = wallet;
         connectSelectedWallet(false).catch(() => {});
+      }
+    } else if (!wType || wType === "injected") {
+      selectedProviderDetail = null;
+      
+      const tryInjected = () => {
+        if (window.ethereum) {
+          connectSelectedWallet(false).catch(() => {});
+          return true;
+        }
+        return false;
+      };
+
+      if (!tryInjected()) {
+        // Poll for a brief moment in case window.ethereum injection is delayed
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (tryInjected() || attempts >= 20) {
+            clearInterval(interval);
+          }
+        }, 100);
       }
     }
   }
@@ -123,8 +152,11 @@ async function connectSelectedWallet(forceFresh = false) {
       method: "eth_requestAccounts",
     });
 
-    // Switch to Monad Mainnet
-    await switchToMonadWithProvider(activeProviderObj);
+    // Switch to Monad Mainnet only if not already on it
+    const chainId = await activeProviderObj.request({ method: "eth_chainId" });
+    if (chainId !== MONAD_MAINNET.chainId) {
+      await switchToMonadWithProvider(activeProviderObj);
+    }
 
     signer      = await provider.getSigner();
     userAddress = await signer.getAddress();
@@ -603,7 +635,7 @@ function buildInboxCard(t) {
     <div class="transfer-card-body">
       <div class="transfer-row">
         <span class="transfer-label">From</span>
-        <span class="transfer-value mono">${shortAddress(t.sender)}</span>
+        <span class="transfer-value mono full-address">${t.sender}</span>
       </div>
       <div class="transfer-row">
         <span class="transfer-label">Token</span>
