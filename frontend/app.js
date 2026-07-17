@@ -290,6 +290,22 @@ async function switchAppNetwork(networkId, requestWalletSwitch = true) {
       } catch (err) {
         console.error("Failed to switch network in wallet:", err);
         showToast("Switch network in your wallet", "warning");
+        
+        // Revert app state back to the wallet's actual chain ID
+        try {
+          const actualChainId = await activeProviderObj.request({ method: "eth_chainId" });
+          let matchedNetwork = "mainnet";
+          for (const net of Object.values(NETWORKS)) {
+            if (net.params.chainId === actualChainId) {
+              matchedNetwork = net.id;
+              break;
+            }
+          }
+          await switchAppNetwork(matchedNetwork, false);
+        } catch (revertErr) {
+          console.error("Failed to revert network:", revertErr);
+        }
+        return;
       }
     }
   }
@@ -623,7 +639,7 @@ async function loadOutbox() {
   } catch (err) {
     loading.classList.add("hidden");
     console.error(err);
-    showToast("Failed to load outbox", "error");
+    showToast("Failed to load outbox: " + shortError(err), "error");
   }
 }
 
@@ -712,7 +728,7 @@ async function loadInbox() {
   } catch (err) {
     loading.classList.add("hidden");
     console.error(err);
-    showToast("Failed to load inbox", "error");
+    showToast("Failed to load inbox: " + shortError(err), "error");
   }
 }
 
