@@ -8,8 +8,7 @@
 const CONTRACT_ADDRESS = "0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be"; // Monad Mainnet
 
 const MONAD_MAINNET = {
-  chainId:         "0x8F",  // 143
-  chainIdDecimal:  143,
+  chainId:         "0x8f",  // 143
   chainName:       "Monad Mainnet",
   rpcUrls:         ["https://rpc.monad.xyz/"],
   nativeCurrency:  { name: "MON", symbol: "MON", decimals: 18 },
