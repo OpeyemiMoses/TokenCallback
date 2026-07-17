@@ -487,8 +487,8 @@ function getSelectedDeadlineSec() {
 
 async function setMaxAmount() {
   if (selectedTokenType === "native") {
-    // Leave some for gas
-    const gas = ethers.parseEther("0.01");
+    // Leave some for gas (0.05 MON is safe for gas limit buffer checks)
+    const gas = ethers.parseEther("0.05");
     const max = nativeBalance > gas ? nativeBalance - gas : 0n;
     document.getElementById("amount").value = ethers.formatEther(max);
   } else {
