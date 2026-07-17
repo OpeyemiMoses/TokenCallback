@@ -5,17 +5,37 @@
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const CONTRACT_ADDRESS = "0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be"; // Monad Mainnet
-
-const MONAD_MAINNET = {
-  chainId:         "0x8f",  // 143
-  chainName:       "Monad Mainnet",
-  rpcUrls:         ["https://rpc.monad.xyz/"],
-  nativeCurrency:  { name: "MON", symbol: "MON", decimals: 18 },
-  blockExplorerUrls: ["https://monadscan.com"],
+const NETWORKS = {
+  mainnet: {
+    id: "mainnet",
+    contractAddress: "0x2Cb084E68ef4e6a9cA0512Bd5f722ADe672F36Be",
+    params: {
+      chainId: "0x8f", // 143
+      chainName: "Monad Mainnet",
+      rpcUrls: ["https://rpc.monad.xyz/"],
+      nativeCurrency: { name: "MON", symbol: "MON", decimals: 18 },
+      blockExplorerUrls: ["https://monadscan.com"],
+    }
+  },
+  testnet: {
+    id: "testnet",
+    contractAddress: "0xa110bDF3b2F0ea4b9F006bfeD1517d60e2D06405",
+    params: {
+      chainId: "0x279f", // 10143
+      chainName: "Monad Testnet",
+      rpcUrls: ["https://testnet-rpc.monad.xyz/"],
+      nativeCurrency: { name: "MON", symbol: "MON", decimals: 18 },
+      blockExplorerUrls: ["https://testnet.monadexplorer.com"],
+    }
+  }
 };
 
-const EXPLORER_URL = MONAD_MAINNET.blockExplorerUrls[0];
+let currentNetwork = localStorage.getItem("selectedNetwork") || "mainnet";
+if (!NETWORKS[currentNetwork]) currentNetwork = "mainnet";
+
+let activeNetworkConfig = NETWORKS[currentNetwork];
+let CONTRACT_ADDRESS = activeNetworkConfig.contractAddress;
+let EXPLORER_URL = activeNetworkConfig.params.blockExplorerUrls[0];
 
 // Minimal ABI — only what we need
 const ABI = [
@@ -77,6 +97,12 @@ window.addEventListener("eip6963:announceProvider", (event) => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   updateSummary();
+
+  // Initialize network select dropdown state
+  const selectEl = document.getElementById("network-select");
+  if (selectEl) {
+    selectEl.value = currentNetwork;
+  }
 
   // Request provider announcements
   window.dispatchEvent(new Event("eip6963:requestProvider"));
@@ -173,10 +199,25 @@ async function connectSelectedWallet(forceFresh = false) {
       });
     }
 
-    // Switch to Monad Mainnet only if not already on it
+    // Switch to active network chain only if not already on it
     const chainId = await activeProviderObj.request({ method: "eth_chainId" });
-    if (chainId !== MONAD_MAINNET.chainId) {
-      await switchToMonadWithProvider(activeProviderObj);
+    if (chainId !== activeNetworkConfig.params.chainId) {
+      // Check if the user's wallet is already set to the other supported chain
+      let matchedNetwork = null;
+      for (const net of Object.values(NETWORKS)) {
+        if (net.params.chainId === chainId) {
+          matchedNetwork = net.id;
+          break;
+        }
+      }
+      
+      if (matchedNetwork) {
+        // Silently update app network configuration without requesting wallet switch again
+        await switchAppNetwork(matchedNetwork, false);
+      } else {
+        // Unsupported chain, request switch to selected network chain
+        await switchToActiveNetworkWithProvider(activeProviderObj);
+      }
     }
 
     signer      = await provider.getSigner();
@@ -206,21 +247,64 @@ async function connectSelectedWallet(forceFresh = false) {
   }
 }
 
-async function switchToMonadWithProvider(activeProviderObj) {
+async function switchToActiveNetworkWithProvider(activeProviderObj) {
   try {
     await activeProviderObj.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: MONAD_MAINNET.chainId }],
+      params: [{ chainId: activeNetworkConfig.params.chainId }],
     });
   } catch (err) {
     if (err.code === 4902) {
       await activeProviderObj.request({
         method: "wallet_addEthereumChain",
-        params: [MONAD_MAINNET],
+        params: [activeNetworkConfig.params],
       });
     } else {
       throw err;
     }
+  }
+}
+
+async function switchAppNetwork(networkId, requestWalletSwitch = true) {
+  if (!NETWORKS[networkId]) return;
+
+  currentNetwork = networkId;
+  localStorage.setItem("selectedNetwork", networkId);
+  activeNetworkConfig = NETWORKS[networkId];
+  CONTRACT_ADDRESS = activeNetworkConfig.contractAddress;
+  EXPLORER_URL = activeNetworkConfig.params.blockExplorerUrls[0];
+
+  // Sync dropdown UI
+  const selectEl = document.getElementById("network-select");
+  if (selectEl) selectEl.value = networkId;
+
+  // If wallet is connected, request wallet chain switch
+  if (provider && requestWalletSwitch) {
+    const activeProviderObj = selectedProviderDetail ? selectedProviderDetail.provider : window.ethereum;
+    if (activeProviderObj) {
+      try {
+        const chainId = await activeProviderObj.request({ method: "eth_chainId" });
+        if (chainId !== activeNetworkConfig.params.chainId) {
+          await switchToActiveNetworkWithProvider(activeProviderObj);
+        }
+      } catch (err) {
+        console.error("Failed to switch network in wallet:", err);
+        showToast("Switch network in your wallet", "warning");
+      }
+    }
+  }
+
+  // Re-initialize contract instance with the new address if connected
+  if (signer) {
+    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+  }
+
+  // Reset & reload dashboard stats/lists if connected
+  if (userAddress) {
+    loadStats();
+    loadNativeBalance();
+    loadOutbox();
+    loadInbox();
   }
 }
 
@@ -231,7 +315,7 @@ function onConnected() {
   // Hide connect button, show wallet info
   document.getElementById("connect-btn").classList.add("hidden");
   document.getElementById("wallet-info").classList.remove("hidden");
-  document.getElementById("network-badge").classList.remove("hidden");
+  document.getElementById("network-badge")?.classList.remove("hidden");
   document.getElementById("wallet-address").textContent = shortAddress(userAddress);
 
   // Show main app

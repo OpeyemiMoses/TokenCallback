@@ -23,9 +23,11 @@
         <span class="logo-text">Call<span class="logo-accent">Back</span></span>
       </a>
       <div class="nav-right" id="nav-right">
-        <div id="network-badge" class="network-badge hidden">
-          <span class="network-dot"></span>
-          <span id="network-name">Monad Mainnet</span>
+        <div class="network-select-wrap">
+          <select id="network-select" class="network-dropdown" onchange="switchAppNetwork(this.value)">
+            <option value="mainnet">Monad Mainnet</option>
+            <option value="testnet">Monad Testnet</option>
+          </select>
         </div>
         <!-- Not connected -->
         <button id="connect-btn" class="btn btn-primary" onclick="connectWallet(true)">
