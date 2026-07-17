@@ -62,10 +62,10 @@ window.addEventListener("eip6963:announceProvider", (event) => {
     renderWalletList();
   }
 
-  // Auto-reconnect if it matches the saved uuid
+  // Auto-reconnect if it matches the saved rdns
   if (localStorage.getItem("walletConnected") === "true" && 
       localStorage.getItem("walletType") === "eip6963" &&
-      localStorage.getItem("walletUuid") === info.uuid) {
+      localStorage.getItem("walletRdns") === info.rdns) {
     selectedProviderDetail = { info, provider: providerObj };
     if (document.readyState === "complete" || document.readyState === "interactive") {
       connectSelectedWallet(false).catch(() => {});
@@ -86,11 +86,19 @@ window.addEventListener("DOMContentLoaded", async () => {
     const wType = localStorage.getItem("walletType");
     
     if (wType === "eip6963") {
-      const savedUuid = localStorage.getItem("walletUuid");
-      if (savedUuid && discoveredProviders.has(savedUuid)) {
-        const wallet = discoveredProviders.get(savedUuid);
-        selectedProviderDetail = wallet;
-        connectSelectedWallet(false).catch(() => {});
+      const savedRdns = localStorage.getItem("walletRdns");
+      if (savedRdns) {
+        let foundWallet = null;
+        for (const wallet of discoveredProviders.values()) {
+          if (wallet.info.rdns === savedRdns) {
+            foundWallet = wallet;
+            break;
+          }
+        }
+        if (foundWallet) {
+          selectedProviderDetail = foundWallet;
+          connectSelectedWallet(false).catch(() => {});
+        }
       }
     } else if (!wType || wType === "injected") {
       selectedProviderDetail = null;
@@ -148,9 +156,22 @@ async function connectSelectedWallet(forceFresh = false) {
       });
     }
 
-    await activeProviderObj.request({
-      method: "eth_requestAccounts",
-    });
+    let accounts = [];
+    if (!forceFresh) {
+      accounts = await activeProviderObj.request({ method: "eth_accounts" });
+    }
+
+    if (accounts.length === 0) {
+      if (!forceFresh) {
+        // Auto-reconnecting on reload, but no accounts are authorized.
+        // Let's reset the UI/storage and return silently.
+        onDisconnected();
+        return;
+      }
+      accounts = await activeProviderObj.request({
+        method: "eth_requestAccounts",
+      });
+    }
 
     // Switch to Monad Mainnet only if not already on it
     const chainId = await activeProviderObj.request({ method: "eth_chainId" });
@@ -174,7 +195,7 @@ async function connectSelectedWallet(forceFresh = false) {
     // Save connection details
     if (selectedProviderDetail) {
       localStorage.setItem("walletType", "eip6963");
-      localStorage.setItem("walletUuid", selectedProviderDetail.info.uuid);
+      localStorage.setItem("walletRdns", selectedProviderDetail.info.rdns);
     } else {
       localStorage.setItem("walletType", "injected");
     }
@@ -232,6 +253,8 @@ function onConnected() {
 
 function disconnectWallet() {
   localStorage.removeItem("walletConnected");
+  localStorage.removeItem("walletType");
+  localStorage.removeItem("walletRdns");
   closeMobileMenu();
 
   // Clear local state — the wallet extension manages its own connection
@@ -247,6 +270,14 @@ function disconnectWallet() {
   document.getElementById('network-badge')?.classList.add('hidden');
   document.getElementById('not-connected')?.classList.remove('hidden');
   document.getElementById('main-app')?.classList.add('hidden');
+
+  // Clear dashboard stats
+  const balEl = document.getElementById("stat-balance");
+  if (balEl) balEl.textContent = "—";
+  const pendingEl = document.getElementById("stat-pending");
+  if (pendingEl) pendingEl.textContent = "—";
+  const totalEl = document.getElementById("stat-total");
+  if (totalEl) totalEl.textContent = "—";
 
   showToast('Wallet disconnected', 'info');
 }
